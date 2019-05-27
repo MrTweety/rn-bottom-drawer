@@ -61,12 +61,18 @@ export default class Animator extends Component {
   }
 
   _handlePanResponderRelease = (e, gesture) => {
-    if (gesture.dy > this.props.toggleThreshold && this.props.currentPosition === this.props.upPosition) {
+    if (gesture.dy < -this.props.toggleThreshold && this.props.currentPosition === this.props.downPosition) {
+      this._transitionTo(this.props.upPosition, this.props.onExpanded);
+      this.props.onDrawerStateSet(UP_STATE);        
+    } else if (gesture.dy >= -this.props.toggleThreshold && this.props.currentPosition === this.props.downPosition) {
+      this._transitionTo(this.props.downPosition, ()=>{});
+      this.props.onDrawerStateSet(DOWN_STATE);   
+    } else if (gesture.dy > this.props.toggleThreshold && this.props.currentPosition === this.props.upPosition ) {
       this._transitionTo(this.props.downPosition, this.props.onCollapsed);
       this.props.onDrawerStateSet(DOWN_STATE);
-    } else if (gesture.dy < -this.props.toggleThreshold && this.props.currentPosition === this.props.downPosition) {
-      this._transitionTo(this.props.upPosition, this.props.onExpanded);
-      this.props.onDrawerStateSet(UP_STATE);
+    } else if (gesture.dy <= this.props.toggleThreshold && this.props.currentPosition === this.props.upPosition ) {
+        this._transitionTo(this.props.upPosition, ()=>{});
+        this.props.onDrawerStateSet(UP_STATE);
     } else {
       this._resetPosition();
     }
@@ -84,7 +90,7 @@ export default class Animator extends Component {
   _transitionTo(position, callback) {
     Animated.spring(this.position, {
       toValue: position
-    }).start(() => this.props.onExpanded());
+    }).start();
 
     this.props.setCurrentPosition(position);
     callback();
